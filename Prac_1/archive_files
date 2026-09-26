@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [ ! -d "$1" ]; then
+    echo "Каталог не найден"
+    exit 1
+fi
+
+find "$1" -maxdepth 1 -type f -name "*.$2" -print0 |
+    tar --null -cvf archive.tar --files-from=-

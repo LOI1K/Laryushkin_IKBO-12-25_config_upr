@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+for file in *.c *.js *.py; do
+    [ -e "$file" ] || continue
+
+    case "$file" in
+        *.py)
+            if head -n 1 "$file" | grep -qE '^[[:space:]]*#'; then
+                echo "$file: комментарий есть"
+            else
+                echo "$file: комментария нет"
+            fi
+            ;;
+
+        *.c|*.js)
+            if head -n 1 "$file" | grep -qE '^[[:space:]]*(//|/\*)'; then
+                echo "$file: комментарий есть"
+            else
+                echo "$file: комментария нет"
+            fi
+            ;;
+    esac
+done

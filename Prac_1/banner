@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+text="$1"
+
+border="+"
+
+for ((i=0; i<${#text}+2; i++)); do
+	border="${border}-"
+done
+
+border="${border}+"
+
+echo "$border"
+echo "| $text |"
+echo "$border"
