@@ -3,8 +3,15 @@ import io
 import unittest
 from contextlib import redirect_stdout
 from unittest.mock import patch
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from src.main import execute_command, main
+from src.main import (
+  execute_command,
+  main,
+  parse_arguments,
+  run_script
+)
 
 
 class TestShell(unittest.TestCase):
@@ -56,6 +63,48 @@ class TestShell(unittest.TestCase):
 
         self.assertIn("['documents', 'photos']", output.getvalue())
 
+    def test_parse_arguments(self):
+        """Test command-line parameters."""
+        args = parse_arguments([
+            "--vfs", "virtual",
+            "--script", "demo.txt"
+        ])
+
+        self.assertEqual(args.vfs, Path("virtual"))
+        self.assertEqual(args.script, Path("demo.txt"))
+
+    def test_script_continues_after_error(self):
+        """Test skipping invalid commands."""
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "demo.txt"
+            path.write_text(
+                "ls first\nunknown\ncd second\n",
+                encoding="utf-8"
+            )
+
+            output = io.StringIO()
+            with redirect_stdout(output):
+                running = run_script(path)
+
+        self.assertTrue(running)
+        self.assertIn("неизвестная команда", output.getvalue())
+        self.assertIn("Команда: cd", output.getvalue())
+
+    def test_script_exit(self):
+        """Test stopping a script with exit."""
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "demo.txt"
+            path.write_text(
+                "ls first\nexit\nls second\n",
+                encoding="utf-8"
+            )
+
+            output = io.StringIO()
+            with redirect_stdout(output):
+                running = run_script(path)
+
+        self.assertFalse(running)
+        self.assertNotIn("ls second", output.getvalue())
 
 if __name__ == "__main__":
     unittest.main()

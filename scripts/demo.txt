@@ -1,0 +1,6 @@
+ls documents
+cd home
+unknown
+ls photos
+exit 123
+ls final
