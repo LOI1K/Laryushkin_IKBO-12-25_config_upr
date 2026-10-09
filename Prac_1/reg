@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-chmod 755 "$1"
-sudo cp "$1" /usr/local/bin/
-sudo chmod 755 "/usr/local/bin/$(basename "$1")"
