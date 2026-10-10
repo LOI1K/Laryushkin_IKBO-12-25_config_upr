@@ -2,6 +2,7 @@
 import argparse
 import sys
 from pathlib import Path
+from src.vfs import VirtualFileSystem
 
 VFS_NAME = "my-vfs"
 
@@ -53,7 +54,7 @@ def execute_line(line):
     return execute_command(parts[0], parts[1:])
 
 
-def run_script(path):
+def run_script(path, vfs_name=VFS_NAME):
     """Execute commands from a startup script."""
     try:
         with path.open(encoding="utf-8") as script:
@@ -63,7 +64,7 @@ def run_script(path):
                 if not line or line.startswith("#"):
                     continue
 
-                print(f"{VFS_NAME}:/$ {line}")
+                print(f"{vfs_name}:/$ {line}")
 
                 if not execute_line(line):
                     return False
@@ -81,12 +82,27 @@ def main(argv=()):
     print(f"VFS: {args.vfs or 'не указана'}")
     print(f"Стартовый скрипт: {args.script or 'не указан'}")
 
-    if args.script and not run_script(args.script):
+    vfs=None
+    vfs_name = VFS_NAME
+
+    if args.vfs:
+        try:
+            vfs = VirtualFileSystem(args.vfs)
+        except (OSError, ValueError) as error:
+            print(f"Ошибка загрузки VFS: {error}")
+            return
+
+        vfs_name = vfs.name
+        directories, files = vfs.summary()
+        print(f"VFS загружена: {directories} директории, "
+              f"{files} файлов.")
+
+    if args.script and not run_script(args.script, vfs_name):
         return
 
     while True:
         try:
-            user_input = input(f"{VFS_NAME}:/$ ")
+            user_input = input(f"{vfs_name}:/$ ")
         except (EOFError, KeyboardInterrupt):
             print("\nВыход из эмулятора.")
             break

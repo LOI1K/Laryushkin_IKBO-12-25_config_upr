@@ -1,0 +1,8 @@
+ls
+ls documents
+cd /
+cd ..
+unknown
+exit 123
+ls
+exit
