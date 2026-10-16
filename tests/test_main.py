@@ -27,33 +27,39 @@ class TestShell(unittest.TestCase):
         return running, output.getvalue()
 
     def test_ls(self):
+        """Test the ls command."""
         running, output = self.run_command("ls", ["documents"])
         self.assertTrue(running)
         self.assertIn("Команда: ls", output)
         self.assertIn("documents", output)
 
     def test_cd(self):
+        """Test the cd command."""
         running, output = self.run_command("cd", ["home"])
         self.assertTrue(running)
         self.assertIn("Команда: cd", output)
         self.assertIn("home", output)
 
     def test_unknown_command(self):
+        """Test handling an unknown command."""
         running, output = self.run_command("unknown", [])
         self.assertTrue(running)
         self.assertIn("Ошибка: неизвестная команда", output)
 
     def test_exit_with_arguments(self):
+        """Test rejecting arguments for exit."""
         running, output = self.run_command("exit", ["123"])
         self.assertTrue(running)
         self.assertIn("Ошибка", output)
 
     def test_exit(self):
+        """Test exiting the emulator."""
         running, output = self.run_command("exit", [])
         self.assertFalse(running)
         self.assertIn("Выход из эмулятора", output)
 
     def test_repl_parser(self):
+        """Test parsing commands in the REPL."""
         output = io.StringIO()
         commands = ["ls documents photos", "", "exit"]
 
@@ -105,6 +111,7 @@ class TestShell(unittest.TestCase):
 
         self.assertFalse(running)
         self.assertNotIn("ls second", output.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -82,7 +82,7 @@ def main(argv=()):
     print(f"VFS: {args.vfs or 'не указана'}")
     print(f"Стартовый скрипт: {args.script or 'не указан'}")
 
-    vfs=None
+    vfs = None
     vfs_name = VFS_NAME
 
     if args.vfs:
