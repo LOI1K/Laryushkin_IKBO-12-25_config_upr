@@ -1,0 +1,35 @@
+
+# Stage 4: main shell commands
+
+# List files and directories
+ls
+cd level1
+ls
+cd level2
+ls
+cd level3
+ls
+
+# Read a virtual file
+head deep.txt
+head -n 1 deep.txt
+head -n 0 deep.txt
+
+# Echo and who
+echo Hello from stage 4
+who
+
+# Navigate back to root
+cd /
+ls
+
+# Error handling
+ls nonexistent
+cd nonexistent
+head missing.txt
+head -n abc deep.txt
+who test
+cd level1 level2
+
+# Exit emulator
+exit
