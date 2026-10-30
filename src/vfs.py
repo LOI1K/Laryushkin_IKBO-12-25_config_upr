@@ -15,6 +15,7 @@ class VirtualFileSystem:
         self.directories = {"/"}
         self.files = {}
         self.cwd = "/"
+        self.permissions = {"/": root.stat().st_mode & 0o777}
 
         for path in root.rglob("*"):
             if path.is_symlink():
@@ -24,8 +25,14 @@ class VirtualFileSystem:
 
             if path.is_dir():
                 self.directories.add(virtual_path)
+                self.permissions[virtual_path] = (
+                    path.stat().st_mode & 0o777
+                )
             elif path.is_file():
                 self.files[virtual_path] = path.read_bytes()
+                self.permissions[virtual_path] = (
+                    path.stat().st_mode & 0o777
+                )
 
     def summary(self):
         """Return the number of directories and files."""
@@ -81,3 +88,12 @@ class VirtualFileSystem:
             raise ValueError(f"head: файл не найден: {path}")
 
         return self.files[target]
+
+    def chmod(self, path, mode):
+        """Change virtual permissions without modifying the disk."""
+        target = self.resolve(path)
+
+        if target not in self.permissions:
+            raise ValueError(f"chmod: путь не найден: {path}")
+
+        self.permissions[target] = mode

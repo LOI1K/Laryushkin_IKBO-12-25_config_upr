@@ -1,4 +1,4 @@
-
+import re
 import argparse
 import sys
 import getpass
@@ -6,6 +6,17 @@ from pathlib import Path
 from src.vfs import VirtualFileSystem
 
 VFS_NAME = "my-vfs"
+
+COMMAND_HELP = {
+    "ls": "Показать содержимое виртуальной директории",
+    "cd": "Перейти в виртуальную директорию",
+    "echo": "Вывести текст",
+    "head": "Показать первые строки виртуального файла",
+    "who": "Показать пользователя эмулятора",
+    "chmod": "Изменить права виртуального файла или директории",
+    "help": "Показать справку по командам",
+    "exit": "Завершить работу эмулятора",
+}
 
 
 def parse_arguments(argv):
@@ -105,6 +116,42 @@ def run_navigation(command, arguments, vfs):
         run_cd(vfs, arguments)
 
 
+def run_chmod(vfs, arguments):
+    """Change permissions of a virtual file or directory."""
+    if vfs is None:
+        print("Ошибка: VFS не загружена.")
+        return
+
+    if len(arguments) != 2:
+        print("Ошибка: использование: chmod режим путь")
+        return
+
+    mode_text, path = arguments
+
+    if not re.fullmatch(r"0?[0-7]{3}", mode_text):
+        print("Ошибка: chmod: неверный восьмеричный режим.")
+        return
+
+    try:
+        vfs.chmod(path, int(mode_text, 8))
+    except ValueError as error:
+        print(f"Ошибка: {error}")
+
+
+def run_info_command(command, arguments):
+    """Show the emulator user or available commands."""
+    if arguments:
+        print(f"Ошибка: {command} не принимает аргументы.")
+        return
+
+    if command == "who":
+        print(f"{getpass.getuser()} emulator")
+        return
+
+    for name, description in COMMAND_HELP.items():
+        print(f"{name}: {description}")
+
+
 def execute_command(command, arguments, vfs=None):
     """Execute a shell command."""
     if command == "exit":
@@ -124,11 +171,10 @@ def execute_command(command, arguments, vfs=None):
             print("Ошибка: VFS не загружена.")
         else:
             run_head(vfs, arguments)
-    elif command == "who":
-        if arguments:
-            print("Ошибка: who не принимает аргументы.")
-        else:
-            print(f"{getpass.getuser()} emulator")
+    elif command in ("who", "help"):
+        run_info_command(command, arguments)
+    elif command == "chmod":
+        run_chmod(vfs, arguments)
     else:
         print(f"Ошибка: неизвестная команда '{command}'")
 
